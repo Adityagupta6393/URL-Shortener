@@ -34,7 +34,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // Routes
-import authRoutes from "./routes/auth.routes.js";
+import authRoutes from "./modules/auth/auth.routes.js";
 
 app.use("/api/auth", authRoutes);
 

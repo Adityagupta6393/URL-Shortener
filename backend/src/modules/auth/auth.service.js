@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
-import ApiError from "../utils/ApiError.js";
-import userRepository from "../repositories/user.repository.js";
+import ApiError from "../../utils/ApiError.js";
+import userRepository from "./auth.repository.js";
 import {
     generateAccessToken,
     generateRefreshToken,
-} from "../utils/jwt.js";
+} from "../../utils/jwt.js";
 
 const register = async ({ name, email, password }) => {
 

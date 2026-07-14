@@ -1,5 +1,5 @@
-import ApiResponse from "../utils/ApiResponse.js";
-import authService from "../services/auth.service.js";
+import ApiResponse from "../../utils/ApiResponse.js";
+import authService from "./auth.service.js";
 
 const register = async (req, res, next) => {
 
