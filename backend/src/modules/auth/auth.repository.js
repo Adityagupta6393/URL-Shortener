@@ -12,8 +12,22 @@ const findUserById = async (id) => {
     return await User.findById(id);
 };
 
+const updatePassword = async (userId, hashedPassword) => {
+    return await User.findByIdAndUpdate(
+        userId,
+        {
+            password: hashedPassword,
+        },
+        {
+            new: true,
+            runValidators: true,
+        }
+    );
+};
+
 export default {
     findUserByEmail,
     createUser,
     findUserById,
+    updatePassword
 };

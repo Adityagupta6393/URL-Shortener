@@ -177,6 +177,20 @@ const logoutAll = async (req, res, next) => {
     }
 };
 
+const changePassword = async(req, res, next) => {
+    const {currentPassword, newPassword} = req.body;
+    await authService.changePassword({userId : req.user.id, currentPassword, newPassword});
+
+    clearAuthCookies(res);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Passowrd changed successfully"
+        )
+    )
+}
+
 export default {
     register,
     login,
@@ -184,4 +198,5 @@ export default {
     logout,
     logoutAll,
     profile,
+    changePassword
 };

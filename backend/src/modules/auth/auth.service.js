@@ -14,6 +14,11 @@ import refreshTokenRepository from "./refresh-token.repository.js";
 import { REFRESH_TOKEN_MAX_AGE } from "../../constants/auth.constants.js";
 
 import { UAParser } from "ua-parser-js";
+import authRepository from "./auth.repository.js";
+
+import { clearAuthCookies } from "../../config/cookies.js";
+
+import User from "./auth.model.js";
 
 const register = async ({ name, email, password }) => {
 
@@ -114,6 +119,57 @@ const logoutAll = async (userId) => {
 
     await refreshTokenRepository.deleteAllByUser(userId);
 
+};
+
+const changePassword = async ({
+    userId,
+    currentPassword,
+    newPassword,
+}) => {
+
+    const user = await userRepository.findUserById(userId);
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const isMatch = await bcrypt.compare(
+        currentPassword,
+        user.password
+    );
+
+    if (!isMatch) {
+        throw new ApiError(
+            401,
+            "Current password is incorrect"
+        );
+    }
+
+    const isSamePassword = await bcrypt.compare(
+        newPassword,
+        user.password
+    );
+
+    if (isSamePassword) {
+        throw new ApiError(
+            400,
+            "New password must be different from the current password"
+        );
+    }
+
+    const hashedPassword = await bcrypt.hash(
+        newPassword,
+        10
+    );
+
+    await userRepository.updatePassword(
+        userId,
+        hashedPassword
+    );
+
+    await refreshTokenRepository.deleteAllByUser(
+        userId
+    );
 };
 
 const createSession = async ({ user, ipAddress, userAgent }) => {
@@ -248,4 +304,5 @@ export default {
     logout,
     logoutAll,
     getCurrentUser,
+    changePassword
 };
