@@ -24,14 +24,11 @@ router.post(
 router.get(
     "/profile",
     authenticate,
-    (req, res) => {
-
-        res.json({
-            success: true,
-            user: req.user
-        });
-
-    }
+    authController.profile
 );
+
+router.post("/logout", authenticate, authController.logout);
+
+router.post("/refresh", authController.refresh);
 
 export default router;

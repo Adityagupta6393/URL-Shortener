@@ -1,5 +1,10 @@
 import ApiResponse from "../../utils/ApiResponse.js";
 import authService from "./auth.service.js";
+import {
+    cookieOptions,
+    accessCookieOptions,
+    refreshCookieOptions,
+} from "../../config/cookies.js";
 
 const register = async (req, res, next) => {
 
@@ -24,15 +29,38 @@ const login = async (req, res, next) => {
 
     try {
 
-        const data = await authService.login(req.body);
+        // const data = await authService.login(req.body);
 
-        res.status(200).json(
-            new ApiResponse(
-                200,
-                "Login successful",
-                data
+        // res.status(200).json(
+        //     new ApiResponse(
+        //         200,
+        //         "Login successful",
+        //         data
+        //     )
+        // );
+
+        const { user, accessToken, refreshToken } =
+            await authService.login(req.body);
+
+        return res
+            .cookie(
+                "accessToken",
+                accessToken,
+                accessCookieOptions
             )
-        );
+            .cookie(
+                "refreshToken",
+                refreshToken,
+                refreshCookieOptions
+            )
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    "Login successful",
+                    { user }
+                )
+            );
 
     } catch (err) {
         next(err);
@@ -40,7 +68,92 @@ const login = async (req, res, next) => {
 
 };
 
+const refresh = async (req, res, next) => {
+    try {
+
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            throw new ApiError(401, "Refresh token is required");
+        }
+
+        const { accessToken, refreshToken: newRefreshToken } =
+            await authService.refresh({ refreshToken });
+
+        return res
+            .cookie(
+                "accessToken",
+                accessToken,
+                accessCookieOptions
+            )
+            .cookie(
+                "refreshToken",
+                newRefreshToken,
+                refreshCookieOptions
+            )
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    "Token refreshed successfully"
+                )
+            );
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+const logout = async (req, res, next) => {
+    try {
+
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            throw new ApiError(401, "Refresh token is required");
+        }
+
+        await authService.logout({ refreshToken });
+
+        return res
+            .clearCookie("accessToken", cookieOptions)
+            .clearCookie("refreshToken", cookieOptions)
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    "Logged out successfully"
+                )
+            );
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+const profile = async (req, res, next) => {
+    try {
+        console.log(req.user);
+        console.log(req.user.id);
+        const user = await authService.getCurrentUser(req.user.id);
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Current user retrieved successfully",
+                { user }
+            )
+        );
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 export default {
     register,
     login,
+    refresh,
+    logout,
+    profile,
 };
