@@ -4,6 +4,7 @@ import {
     cookieOptions,
     accessCookieOptions,
     refreshCookieOptions,
+    clearAuthCookies
 } from "../../config/cookies.js";
 
 const register = async (req, res, next) => {
@@ -40,7 +41,11 @@ const login = async (req, res, next) => {
         // );
 
         const { user, accessToken, refreshToken } =
-            await authService.login(req.body);
+            await authService.login({
+                ...req.body,
+                ipAddress: req.ip,
+                userAgent: req.get("User-Agent"),
+            });
 
         return res
             .cookie(
@@ -78,7 +83,11 @@ const refresh = async (req, res, next) => {
         }
 
         const { accessToken, refreshToken: newRefreshToken } =
-            await authService.refresh({ refreshToken });
+            await authService.refresh({
+                refreshToken,
+                ipAddress: req.ip,
+                userAgent: req.get("User-Agent"),
+            });
 
         return res
             .cookie(
@@ -133,8 +142,7 @@ const logout = async (req, res, next) => {
 
 const profile = async (req, res, next) => {
     try {
-        console.log(req.user);
-        console.log(req.user.id);
+
         const user = await authService.getCurrentUser(req.user.id);
 
         return res.status(200).json(
@@ -150,10 +158,30 @@ const profile = async (req, res, next) => {
     }
 };
 
+const logoutAll = async (req, res, next) => {
+    try {
+
+        await authService.logoutAll(req.user.id);
+
+        clearAuthCookies(res);
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Logged out from all devices successfully"
+            )
+        );
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 export default {
     register,
     login,
     refresh,
     logout,
+    logoutAll,
     profile,
 };

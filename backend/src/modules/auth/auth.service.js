@@ -13,6 +13,8 @@ import refreshTokenRepository from "./refresh-token.repository.js";
 
 import { REFRESH_TOKEN_MAX_AGE } from "../../constants/auth.constants.js";
 
+import { UAParser } from "ua-parser-js";
+
 const register = async ({ name, email, password }) => {
 
     const existingUser = await userRepository.findUserByEmail(email);
@@ -32,7 +34,7 @@ const register = async ({ name, email, password }) => {
     return;
 };
 
-const login = async ({ email, password }) => {
+const login = async ({ email, password, ipAddress, userAgent }) => {
     const user = await userRepository.findUserByEmail(email);
 
     if (!user) {
@@ -45,13 +47,11 @@ const login = async ({ email, password }) => {
         throw new ApiError(401, "Invalid email or password");
     }
 
-    const existingRefreshToken = await refreshTokenRepository.findByUserId(user._id);
-
-    if (existingRefreshToken) {
-        await refreshTokenRepository.deleteById(existingRefreshToken._id);
-    }
-
-    const { accessToken, refreshToken } = await createSession(user);
+    const { accessToken, refreshToken } = await createSession({
+        user,
+        ipAddress,
+        userAgent,
+    });
 
     return {
         user,
@@ -60,7 +60,7 @@ const login = async ({ email, password }) => {
     };
 };
 
-const refresh = async ({ refreshToken }) => {
+const refresh = async ({ refreshToken, ipAddress, userAgent }) => {
 
     const {
         decoded,
@@ -74,8 +74,13 @@ const refresh = async ({ refreshToken }) => {
 
     const newRefreshToken =
         await rotateRefreshToken(
-            matchedToken,
-            decoded.id
+            {
+                matchedToken,
+                userId: decoded.id,
+                ipAddress,
+                userAgent
+            }
+
         );
 
     return {
@@ -105,8 +110,13 @@ const getCurrentUser = async (userId) => {
     return user;
 };
 
+const logoutAll = async (userId) => {
 
-const createSession = async (user) => {
+    await refreshTokenRepository.deleteAllByUser(userId);
+
+};
+
+const createSession = async ({ user, ipAddress, userAgent }) => {
 
     const accessToken = generateAccessToken({
         id: user._id,
@@ -119,12 +129,24 @@ const createSession = async (user) => {
 
     const hashedToken = await hashToken(refreshToken);
 
+    const parser = new UAParser(userAgent);
+
+    const deviceInfo = {
+        browser: parser.getBrowser().name || "Unknown",
+        os: parser.getOS().name || "Unknown",
+        device: parser.getDevice().type || "Desktop",
+    };
+
+    const expiresAt = new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+    );
+
     await refreshTokenRepository.create({
         userId: user._id,
         hashedToken,
-        expiresAt: new Date(
-            Date.now() + REFRESH_TOKEN_MAX_AGE
-        ),
+        ipAddress,
+        deviceInfo,
+        expiresAt,
     });
 
     return {
@@ -162,6 +184,10 @@ const findValidRefreshToken = async (refreshToken) => {
         );
     }
 
+    await refreshTokenRepository.updateLastUsedAt(
+        matchedToken._id
+    );
+
     return {
         decoded,
         matchedToken,
@@ -169,8 +195,12 @@ const findValidRefreshToken = async (refreshToken) => {
 };
 
 const rotateRefreshToken = async (
-    matchedToken,
-    userId
+    {
+        matchedToken,
+        userId,
+        ipAddress,
+        userAgent,
+    }
 ) => {
 
     const refreshToken =
@@ -185,12 +215,24 @@ const rotateRefreshToken = async (
         matchedToken._id
     );
 
+    const parser = new UAParser(userAgent);
+
+    const deviceInfo = {
+        browser: parser.getBrowser().name || "Unknown",
+        os: parser.getOS().name || "Unknown",
+        device: parser.getDevice().type || "Desktop",
+    };
+
+    const expiresAt = new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+    );
+
     await refreshTokenRepository.create({
         userId,
         hashedToken,
-        expiresAt: new Date(
-            Date.now() + REFRESH_TOKEN_MAX_AGE
-        ),
+        ipAddress,
+        deviceInfo,
+        expiresAt,
     });
 
     return refreshToken;
@@ -204,5 +246,6 @@ export default {
     login,
     refresh,
     logout,
+    logoutAll,
     getCurrentUser,
 };

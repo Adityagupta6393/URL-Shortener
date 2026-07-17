@@ -19,4 +19,9 @@ export const refreshCookieOptions = {
     maxAge: REFRESH_TOKEN_MAX_AGE,
 };
 
+export const clearAuthCookies = async (res) => {
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+}
+
 export { cookieOptions };

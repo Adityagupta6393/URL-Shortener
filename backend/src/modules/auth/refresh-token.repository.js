@@ -25,6 +25,15 @@ class RefreshTokenRepository {
             { new: true }
         );
     }
+
+    async updateLastUsedAt(id) {
+        return await RefreshToken.findByIdAndUpdate(
+            id,
+            {
+                lastUsedAt: new Date(),
+            }
+        );
+    };
 }
 
 export default new RefreshTokenRepository();

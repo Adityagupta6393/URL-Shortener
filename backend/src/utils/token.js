@@ -32,3 +32,4 @@ export const hashToken = async (token) => {
 export const compareToken = async (token, hashedToken) => {
     return bcrypt.compare(token, hashedToken);
 };
+

@@ -44,4 +44,6 @@ app.use((req, res, next) => {
 
 app.use(errorHandler);
 
+app.set("trust proxy", 1);
+
 export default app;
