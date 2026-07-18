@@ -172,6 +172,49 @@ const changePassword = async ({
     );
 };
 
+const updateProfile = async ({ userId, name, email }) => {
+
+    const user = await userRepository.findUserById(userId);
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const updates = {};
+
+    if (name !== undefined) {
+        updates.name = name.trim();
+    }
+
+    if (email !== undefined) {
+
+        if (email !== user.email) {
+
+            const existingUser = await userRepository.findUserByEmail(email);
+
+            if (existingUser) {
+                throw new ApiError(409, "Email already exists");
+            }
+        }
+
+        updates.email = email;
+    }
+
+    if (Object.keys(updates).length === 0) {
+        throw new ApiError(
+            400,
+            "No fields provided for update"
+        );
+    }
+
+    const updatedUser = await userRepository.updateProfile(
+        userId,
+        updates
+    );
+
+    return updatedUser;
+};
+
 const createSession = async ({ user, ipAddress, userAgent }) => {
 
     const accessToken = generateAccessToken({
@@ -304,5 +347,6 @@ export default {
     logout,
     logoutAll,
     getCurrentUser,
-    changePassword
+    changePassword,
+    updateProfile
 };

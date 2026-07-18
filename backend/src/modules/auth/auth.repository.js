@@ -25,9 +25,21 @@ const updatePassword = async (userId, hashedPassword) => {
     );
 };
 
+const updateProfile = async (userId, updates) => {
+    return await User.findByIdAndUpdate(
+        userId,
+        updates,
+        {
+            returnDocument : "after",
+            runValidators: true,
+        }
+    );
+};
+
 export default {
     findUserByEmail,
     createUser,
     findUserById,
-    updatePassword
+    updatePassword,
+    updateProfile
 };

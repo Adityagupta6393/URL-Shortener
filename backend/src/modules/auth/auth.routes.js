@@ -1,7 +1,7 @@
 import express from "express";
 
 import authController from "./auth.controller.js";
-import { registerValidator, loginValidator, changePasswordValidator } from "./auth.validator.js";
+import { registerValidator, loginValidator, changePasswordValidator, updateProfileValidator } from "./auth.validator.js";
 import validate from "../../middleware/validate.js";
 import authenticate from "../../middleware/auth.middleware.js";
 
@@ -40,5 +40,13 @@ router.post(
     validate, 
     authController.changePassword
 );
+
+router.patch(
+    "/updateprofile",
+    authenticate,
+    updateProfileValidator,
+    validate,
+    authController.updateProfile
+)
 
 export default router;

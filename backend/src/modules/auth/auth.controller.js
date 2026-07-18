@@ -177,19 +177,47 @@ const logoutAll = async (req, res, next) => {
     }
 };
 
-const changePassword = async(req, res, next) => {
-    const {currentPassword, newPassword} = req.body;
-    await authService.changePassword({userId : req.user.id, currentPassword, newPassword});
+const changePassword = async (req, res, next) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        await authService.changePassword({ userId: req.user.id, currentPassword, newPassword });
 
-    clearAuthCookies(res);
+        clearAuthCookies(res);
 
-    return res.status(200).json(
-        new ApiResponse(
-            200,
-            "Passowrd changed successfully"
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Passowrd changed successfully"
+            )
         )
-    )
+    } catch(error){
+        next(error);
+    }
+    
 }
+
+const updateProfile = async (req, res, next) => {
+    try {
+
+        const updatedUser = await authService.updateProfile({
+            userId: req.user.id,
+            ...req.body,
+        });
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Profile updated successfully",
+                {
+                    user: updatedUser,
+                }
+            )
+        );
+
+    } catch (error) {
+        next(error);
+    }
+};
 
 export default {
     register,
@@ -198,5 +226,6 @@ export default {
     logout,
     logoutAll,
     profile,
-    changePassword
+    changePassword,
+    updateProfile
 };
