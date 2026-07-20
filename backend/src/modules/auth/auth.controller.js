@@ -219,6 +219,101 @@ const updateProfile = async (req, res, next) => {
     }
 };
 
+const verifyEmail = async (req, res, next) => {
+    try {
+
+        const { userId, token } = req.body;
+
+        await authService.verifyEmail({
+            token,
+            userId,
+        });
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Email verified successfully"
+            )
+        );
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+const forgotPassword = async (req, res, next) => {
+    try {
+
+        const { email } = req.body;
+
+        await authService.forgotPassword({
+            email,
+        });
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "If an account with this email exists, a password reset link has been sent."
+            )
+        );
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+const resetPassword = async (req, res, next) => {
+    try {
+
+        const {
+            userId,
+            token,
+            password,
+        } = req.body;
+
+        await authService.resetPassword({
+            userId,
+            token,
+            password,
+        });
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Password reset successfully"
+            )
+        );
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+const resendVerification = async (req, res, next) => {
+
+    try {
+
+        const { email } = req.body;
+
+        await authService.resendVerification({
+            email,
+        });
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Verification email sent successfully"
+            )
+        );
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
 export default {
     register,
     login,
@@ -227,5 +322,9 @@ export default {
     logoutAll,
     profile,
     changePassword,
-    updateProfile
+    updateProfile,
+    verifyEmail,
+    forgotPassword,
+    resetPassword,
+    resendVerification
 };

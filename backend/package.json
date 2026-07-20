@@ -1,13 +1,13 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "type" : "module",
+  "type": "module",
   "description": "Here we'll write backend.",
   "main": "server.js",
   "scripts": {
     "test": "jest",
-    "dev" : "nodemon src/server.js",
-    "start" : "node src/server.js"
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
   },
   "author": "Aditya Gupta",
   "license": "ISC",
@@ -27,6 +27,7 @@
     "nanoid": "^5.1.16",
     "qrcode": "^1.5.4",
     "redis": "^6.1.0",
+    "sib-api-v3-sdk": "^8.5.0",
     "ua-parser-js": "^2.0.10"
   },
   "devDependencies": {

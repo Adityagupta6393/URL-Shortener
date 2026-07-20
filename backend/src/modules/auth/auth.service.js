@@ -20,6 +20,10 @@ import { clearAuthCookies } from "../../config/cookies.js";
 
 import User from "./auth.model.js";
 
+import { generateRandomToken } from "../../utils/randomToken.js";
+import tokenRepository from "./repositories/token.repository.js";
+import emailService from "../../services/email.service.js";
+
 const register = async ({ name, email, password }) => {
 
     const existingUser = await userRepository.findUserByEmail(email);
@@ -30,11 +34,15 @@ const register = async ({ name, email, password }) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+
+
     const user = await userRepository.createUser({
         name,
         email,
         password: hashedPassword,
     });
+
+    await issueEmailVerification(user);
 
     return;
 };
@@ -50,6 +58,13 @@ const login = async ({ email, password, ipAddress, userAgent }) => {
 
     if (!isMatch) {
         throw new ApiError(401, "Invalid email or password");
+    }
+
+    if (!user.isVerified) {
+        throw new ApiError(
+            403,
+            "Please verify your email before logging in."
+        );
     }
 
     const { accessToken, refreshToken } = await createSession({
@@ -337,8 +352,223 @@ const rotateRefreshToken = async (
     return refreshToken;
 };
 
+const verifyEmail = async ({
+    userId,
+    token,
+}) => {
+
+    const user =
+        await userRepository.findUserById(userId);
+
+    if (!user) {
+        throw new ApiError(
+            404,
+            "User not found"
+        );
+    }
+
+    if (user.isVerified) {
+        throw new ApiError(
+            400,
+            "Email is already verified"
+        );
+    }
+
+    const verificationToken =
+        await tokenRepository.findByUserIdAndType(
+            userId,
+            "email_verification"
+        );
+
+    if (!verificationToken) {
+        throw new ApiError(
+            400,
+            "Verification token not found"
+        );
+    }
+
+    const isMatch = await compareToken(
+        token,
+        verificationToken.hashedToken
+    );
+
+    if (!isMatch) {
+        throw new ApiError(
+            400,
+            "Invalid verification token"
+        );
+    }
+
+    await userRepository.verifyUser(userId);
+
+    await tokenRepository.deleteById(
+        verificationToken._id
+    );
+
+    return;
+};
 
 
+const issueEmailVerification = async (user) => {
+
+    if (user.isVerified) {
+        throw new ApiError(
+            400,
+            "Email is already verified"
+        );
+    }
+
+    const token = generateRandomToken();
+
+    const hashedToken = await hashToken(token);
+
+    await tokenRepository.deleteAllByUserIdAndType(
+        user._id,
+        "email_verification"
+    );
+
+    await tokenRepository.create({
+        userId: user._id,
+        type: "email_verification",
+        hashedToken,
+        expiresAt: new Date(
+            Date.now() + 24 * 60 * 60 * 1000
+        ),
+    });
+
+    const verificationUrl =
+        `${process.env.CLIENT_URL}/verify-email?token=${token}&userId=${user._id}`;
+
+
+    try {
+        await emailService.sendVerificationEmail({
+            name: user.name,
+            email: user.email,
+            verificationUrl,
+        });
+    } catch (error) {
+        console.log("send verifcation error : ", error);
+    }
+
+};
+
+
+const forgotPassword = async ({ email }) => {
+
+    const user = await userRepository.findUserByEmail(email);
+
+    // Don't reveal whether the email exists
+    if (!user) {
+        return;
+    }
+
+    const token = generateRandomToken();
+    console.log(token);
+    const hashedToken = await hashToken(token);
+
+    await tokenRepository.deleteAllByUserIdAndType(
+        user._id,
+        "password_reset"
+    );
+
+    await tokenRepository.create({
+        userId: user._id,
+        type: "password_reset",
+        hashedToken,
+        expiresAt: new Date(
+            Date.now() + 60 * 60 * 1000 // 1 hour
+        ),
+    });
+
+    const resetPasswordUrl =
+        `${process.env.CLIENT_URL}/reset-password?token=${token}&userId=${user._id}`;
+
+    await emailService.sendResetPasswordEmail({
+        name: user.name,
+        email: user.email,
+        resetPasswordUrl,
+    });
+};
+
+
+const resetPassword = async ({
+    userId,
+    token,
+    password,
+}) => {
+
+    const user = await userRepository.findUserById(userId);
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const resetToken =
+        await tokenRepository.findByUserIdAndType(
+            userId,
+            "password_reset"
+        );
+
+    if (!resetToken) {
+        throw new ApiError(
+            400,
+            "Reset token not found or expired"
+        );
+    }
+
+    const isMatch = await compareToken(
+        token,
+        resetToken.hashedToken
+    );
+
+    if (!isMatch) {
+        throw new ApiError(
+            400,
+            "Invalid reset token"
+        );
+    }
+
+    const hashedPassword = await bcrypt.hash(
+        password,
+        10
+    );
+
+    await userRepository.updatePassword(
+        userId,
+        hashedPassword
+    );
+
+    // Delete the used reset token
+    await tokenRepository.deleteById(
+        resetToken._id
+    );
+
+    // Logout from all devices
+    await refreshTokenRepository.deleteAllByUser(
+        userId
+    );
+};
+
+const resendVerification = async ({ email }) => {
+
+    const user = await userRepository.findUserByEmail(email);
+
+    if (!user) {
+        throw new ApiError(
+            404,
+            "User not found"
+        );
+    }
+
+    if (user.isVerified) {
+        throw new ApiError(
+            400,
+            "Email is already verified"
+        );
+    }
+
+    await issueEmailVerification(user);
+};
 
 export default {
     register,
@@ -348,5 +578,11 @@ export default {
     logoutAll,
     getCurrentUser,
     changePassword,
-    updateProfile
+    updateProfile,
+
+    verifyEmail,
+    issueEmailVerification,
+    forgotPassword,
+    resetPassword,
+    resendVerification
 };

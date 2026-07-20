@@ -1,7 +1,7 @@
 import express from "express";
 
 import authController from "./auth.controller.js";
-import { registerValidator, loginValidator, changePasswordValidator, updateProfileValidator } from "./auth.validator.js";
+import { registerValidator, loginValidator, changePasswordValidator, updateProfileValidator, verifyEmailValidator, resetPasswordValidator, resendVerificationValidator } from "./auth.validator.js";
 import validate from "../../middleware/validate.js";
 import authenticate from "../../middleware/auth.middleware.js";
 
@@ -48,5 +48,31 @@ router.patch(
     validate,
     authController.updateProfile
 )
+
+router.post(
+    "/verify-email",
+    verifyEmailValidator,
+    validate,
+    authController.verifyEmail
+);
+
+router.post(
+    "/forgot-password",
+    authController.forgotPassword
+);
+
+router.post(
+    "/reset-password",
+    resetPasswordValidator,
+    validate,
+    authController.resetPassword
+);
+
+router.post(
+    "/resend-verification",
+    resendVerificationValidator,
+    validate,
+    authController.resendVerification
+);
 
 export default router;

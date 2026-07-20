@@ -56,3 +56,39 @@ export const updateProfileValidator = [
         .withMessage("Please provide a valid email"),
 
 ];
+
+export const verifyEmailValidator = [
+
+    body("userId")
+        .notEmpty()
+        .withMessage("User ID is required"),
+
+    body("token")
+        .notEmpty()
+        .withMessage("Token is required"),
+
+];
+
+export const resetPasswordValidator = [
+    body("userId")
+        .notEmpty()
+        .withMessage("User id is required"),
+
+    body("token")
+        .notEmpty()
+        .withMessage("Token is required"),
+
+    body("password")
+        .isLength({ min: 8 })
+        .withMessage(
+            "Password must be at least 8 characters"
+        ),
+];
+
+export const resendVerificationValidator = [
+    body("email")
+        .trim()
+        .isEmail()
+        .withMessage("Valid email is required"),
+
+];
