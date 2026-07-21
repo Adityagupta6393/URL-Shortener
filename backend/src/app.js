@@ -33,10 +33,16 @@ app.get("/api/health", (req, res) => {
     });
 });
 
+//import controller
+import urlController from "./modules/url/url.controller.js";
 // Routes
 import authRoutes from "./modules/auth/auth.routes.js";
+import urlRoutes from "./modules/url/url.routes.js";
 
 app.use("/api/auth", authRoutes);
+app.use("/api/urls", urlRoutes);
+app.get("/:shortCode", urlController.redirectToOriginalUrl
+);
 
 app.use((req, res, next) => {
     next(new ApiError(HTTP_STATUS.NOT_FOUND, "Route not found"));

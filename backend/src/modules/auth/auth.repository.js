@@ -36,10 +36,23 @@ const updateProfile = async (userId, updates) => {
     );
 };
 
+const verifyUser = async (userId) => {
+    return await User.findByIdAndUpdate(
+        userId,
+        {
+            isVerified: true,
+        },
+        {
+            new: true,
+        }
+    );
+};
+
 export default {
     findUserByEmail,
     createUser,
     findUserById,
     updatePassword,
-    updateProfile
+    updateProfile,
+    verifyUser
 };

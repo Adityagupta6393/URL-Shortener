@@ -419,7 +419,7 @@ const issueEmailVerification = async (user) => {
     }
 
     const token = generateRandomToken();
-
+    console.log(token);
     const hashedToken = await hashToken(token);
 
     await tokenRepository.deleteAllByUserIdAndType(

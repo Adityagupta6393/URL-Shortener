@@ -42,8 +42,13 @@ const deleteAllByUserIdAndType = async (userId, type) => {
     });
 };
 
+const findAllByUserId = async (userId) => {
+    return await Token.find({ userId });
+};
+
 export default {
     create,
+    findAllByUserId,
     findByUserIdAndType,
     deleteByUserIdAndType,
     deleteById,
