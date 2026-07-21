@@ -77,6 +77,18 @@ const findByIdAndUser = async (
 
 };
 
+const findByUserAndOriginalUrl = async (
+    userId,
+    originalUrl
+) => {
+
+    return await Url.findOne({
+        userId,
+        originalUrl,
+    });
+
+};
+
 export default {
     create,
     findById,
@@ -87,4 +99,5 @@ export default {
     incrementClickCount,
     findActiveByShortCode,
     findByIdAndUser,
+    findByUserAndOriginalUrl,
 };

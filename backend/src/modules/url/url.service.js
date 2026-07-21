@@ -2,8 +2,12 @@ import { nanoid } from "nanoid";
 import QRCode from "qrcode";
 
 import ApiError from "../../utils/ApiError.js";
-
 import urlRepository from "./url.repository.js";
+import normalizeUrl from "../../utils/normalizeUrl.js";
+import { RESERVED_ALIASES } from "../../constants/url.constants.js";
+import bcrypt from "bcrypt";
+import calculateExpiry from "../../utils/calculateExpiry.js";
+import { get } from "mongoose";
 
 const BASE_URL = process.env.BASE_URL;
 
@@ -11,9 +15,28 @@ const createShortUrl = async ({
     userId,
     originalUrl,
     customAlias,
+    password,
+    expireIn
 }) => {
 
+    originalUrl = normalizeUrl(originalUrl);
+
     let shortCode;
+
+    if (customAlias) {
+
+        const alias = customAlias.toLowerCase();
+
+        if (RESERVED_ALIASES.includes(alias)) {
+
+            throw new ApiError(
+                400,
+                "This custom alias is reserved"
+            );
+
+        }
+
+    }
 
     if (customAlias) {
 
@@ -36,12 +59,33 @@ const createShortUrl = async ({
     } else {
         shortCode = await generateUniqueShortCode();
     }
+    const existingUrl =
+        await urlRepository.findByUserAndOriginalUrl(
+            userId,
+            originalUrl
+        );
 
-    const shortUrl =
-        `${BASE_URL}/${shortCode}`;
+    if (existingUrl) {
+        return existingUrl;
+    }
+
+    let hashedPassword = null;
+
+    if (password) {
+
+        hashedPassword =
+            await bcrypt.hash(
+                password,
+                10
+            );
+
+    }
+    const shortUrl = `${BASE_URL}/${shortCode}`;
 
     const qrCode =
         await QRCode.toDataURL(shortUrl);
+
+    const expiresAt = calculateExpiry(expireIn);
 
     return await urlRepository.create({
 
@@ -54,6 +98,12 @@ const createShortUrl = async ({
         customAlias: !!customAlias,
 
         qrCode,
+
+        expiresAt,
+
+        password: hashedPassword,
+
+        isPasswordProtected: Boolean(hashedPassword),
 
     });
 
@@ -117,6 +167,17 @@ const redirectToOriginalUrl = async (shortCode) => {
     //     }),
     // ]);
 
+    if (
+        url.isPasswordProtected
+    ) {
+
+        throw new ApiError(
+            403,
+            "Password required"
+        );
+
+    }
+
     return url.originalUrl;
 };
 
@@ -172,10 +233,86 @@ const deleteUrl = async (
 
 };
 
+const verifyUrlPassword = async ({
+    shortCode,
+    password,
+}) => {
+
+    const url =
+        await urlRepository.findByShortCode(
+            shortCode
+        );
+
+    if (!url) {
+        throw new ApiError(
+            404,
+            "URL not found"
+        );
+    }
+
+    if (!url.isPasswordProtected) {
+        throw new ApiError(
+            400,
+            "URL is not password protected"
+        );
+    }
+
+    const isMatch =
+        await bcrypt.compare(
+            password,
+            url.password
+        );
+
+    if (!isMatch) {
+
+        throw new ApiError(
+            401,
+            "Invalid password"
+        );
+
+    }
+
+    return {
+        originalUrl:
+            url.originalUrl,
+    };
+
+};
+
+
+const getQrCode = async ({
+    urlId,
+    userId,
+}) => {
+
+    const url =
+        await urlRepository.findByIdAndUser(
+            urlId,
+            userId
+        );
+
+    if (!url) {
+
+        throw new ApiError(
+            404,
+            "URL not found"
+        );
+
+    }
+
+    return {
+        qrCode: url.qrCode,
+    };
+
+};
+
+
 export default {
     createShortUrl,
     redirectToOriginalUrl,
     getMyUrls,
     getUrlById,
     deleteUrl,
+    verifyUrlPassword,
+    getQrCode,
 };

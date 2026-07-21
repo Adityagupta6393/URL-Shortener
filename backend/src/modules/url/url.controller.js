@@ -13,6 +13,10 @@ const createShortUrl = async (req, res, next) => {
 
             customAlias: req.body.customAlias,
 
+            password : req.body.password,
+
+            expireIn : req.body.expireIn,
+
         });
 
         return res.status(201).json(
@@ -129,10 +133,77 @@ const deleteUrl = async (
 
 };
 
+
+const verifyUrlPassword = async (
+    req,
+    res,
+    next
+) => {
+
+    try {
+
+        const data =
+            await urlService.verifyUrlPassword(
+                req.body
+            );
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                data,
+                "Password verified"
+            )
+        );
+
+    } catch (error) {
+
+        next(error);
+
+    }
+
+};
+
+const getQrCode = async (
+    req,
+    res,
+    next
+) => {
+
+    try {
+
+        const data =
+            await urlService.getQrCode({
+
+                urlId: req.params.id,
+                userId: req.user.id,
+
+            });
+
+        return res.status(200).json(
+
+            new ApiResponse(
+                200,
+                data,
+                "QR Code fetched successfully"
+            )
+
+        );
+
+    } catch (error) {
+
+        next(error);
+
+    }
+
+};
+
+
 export default {
     createShortUrl,
     redirectToOriginalUrl,
     getMyUrls,
     getUrlById,
     deleteUrl,
+    verifyUrlPassword,
+    getQrCode,
 };

@@ -30,6 +30,32 @@ const createUrlValidation = [
     validate,
 ];
 
+const verifyUrlPasswordValidation = [ 
+    body("password")
+        .optional()
+        .isLength({
+            min: 6,
+            max: 50
+        })
+        .withMessage(
+            "Password must be between 6 and 50 characters"
+        ),
+];
+
+
+const expiresAtValidation = [
+    body("expireIn")
+    .optional()
+    .matches(/^\d+(m|h|d)$/)
+    .withMessage(
+        "expireIn must be like 30m, 12h or 7d"
+    ),
+]
+
+
+
 export {
     createUrlValidation,
+    verifyUrlPasswordValidation,
+    expiresAtValidation
 };
