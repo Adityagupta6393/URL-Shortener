@@ -51,4 +51,11 @@ router.get(
     urlController.getQrCode
 );
 
+router.get(
+    "/:id/analytics",
+    authenticate,
+    urlController.getUrlAnalytics
+);
+
+
 export default router;

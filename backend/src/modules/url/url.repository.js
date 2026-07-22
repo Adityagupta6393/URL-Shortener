@@ -89,6 +89,64 @@ const findByUserAndOriginalUrl = async (
 
 };
 
+const countByUser = (userId) => {
+
+    return Url.countDocuments({
+        userId,
+    });
+
+};
+
+const countActiveByUser = (userId) => {
+
+    return Url.countDocuments({
+
+        userId,
+
+        $or: [
+
+            {
+                expiresAt: null,
+            },
+
+            {
+                expiresAt: {
+                    $gt: new Date(),
+                },
+            },
+
+        ],
+
+    });
+
+};
+
+const countExpiredByUser = (userId) => {
+
+    return Url.countDocuments({
+
+        userId,
+
+        expiresAt: {
+            $lte: new Date(),
+        },
+
+    });
+
+};
+
+const countPasswordProtectedByUser = (userId) => {
+
+    return Url.countDocuments({
+
+        userId,
+
+        isPasswordProtected: true,
+
+    });
+
+};
+
 export default {
     create,
     findById,
@@ -100,4 +158,9 @@ export default {
     findActiveByShortCode,
     findByIdAndUser,
     findByUserAndOriginalUrl,
+    countByUser,
+    countActiveByUser,
+    countExpiredByUser,
+    countPasswordProtectedByUser,
+    
 };

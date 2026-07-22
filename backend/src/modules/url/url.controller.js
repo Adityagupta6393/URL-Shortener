@@ -13,9 +13,9 @@ const createShortUrl = async (req, res, next) => {
 
             customAlias: req.body.customAlias,
 
-            password : req.body.password,
+            password: req.body.password,
 
-            expireIn : req.body.expireIn,
+            expireIn: req.body.expireIn,
 
         });
 
@@ -44,9 +44,17 @@ const redirectToOriginalUrl = async (
     try {
 
         const originalUrl =
-            await urlService.redirectToOriginalUrl(
-                req.params.shortCode
-            );
+            await urlService.redirectToOriginalUrl({
+
+                shortCode: req.params.shortCode,
+
+                ipAddress: req.ip,
+
+                userAgent: req.get("User-Agent"),
+
+                referer: req.get("Referer") || "",
+
+            });
 
         return res.redirect(originalUrl);
 
@@ -197,6 +205,45 @@ const getQrCode = async (
 
 };
 
+const getUrlAnalytics = async (
+    req,
+    res,
+    next
+) => {
+
+    try {
+
+        const data =
+            await urlService.getUrlAnalytics({
+
+                urlId: req.params.id,
+
+                userId: req.user.id,
+
+            });
+
+        return res.status(200).json(
+
+            new ApiResponse(
+
+                200,
+
+                data,
+
+                "Analytics fetched successfully"
+
+            )
+
+        );
+
+    } catch (error) {
+
+        next(error);
+
+    }
+
+};
+
 
 export default {
     createShortUrl,
@@ -206,4 +253,5 @@ export default {
     deleteUrl,
     verifyUrlPassword,
     getQrCode,
+    getUrlAnalytics,
 };
