@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import ApiError from "./utils/ApiError.js";
 import HTTP_STATUS from "./constants/httpStatus.js";
 import errorHandler from "./middleware/errorHandler.js";
+import { redirectLimiter } from "./middleware/rateLimiter.js";
 
 const app = express();
 
@@ -42,9 +43,20 @@ import analyticsRoutes from "./modules/analytics/analytics.routes.js"
 
 app.use("/api/auth", authRoutes);
 app.use("/api/urls", urlRoutes);
-app.get("/:shortCode", urlController.redirectToOriginalUrl );
+app.get("/:shortCode", redirectLimiter, urlController.redirectToOriginalUrl );
 app.use("/api/analytics", analyticsRoutes);
 
+app.get("/health", (req, res) => {
+
+    res.status(200).json({
+
+        status: "UP",
+
+        timestamp: new Date(),
+
+    });
+
+});
 
 
 app.use((req, res, next) => {

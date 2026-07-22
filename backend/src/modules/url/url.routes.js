@@ -7,9 +7,7 @@ import urlController from "./url.controller.js";
 import validate from "../../middleware/validate.js";
 import { verifyUrlPasswordValidation } from "./url.validation.js";
 
-import {
-    createUrlValidation,
-} from "./url.validation.js";
+import { createUrlValidation, } from "./url.validation.js";
 
 const router = express.Router();
 
