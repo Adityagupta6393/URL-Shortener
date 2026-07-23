@@ -2,11 +2,11 @@ import {
     ACCESS_TOKEN_MAX_AGE,
     REFRESH_TOKEN_MAX_AGE,
 } from "../constants/auth.constants.js";
-
+const isProduction = process.env.NODE_ENV === "production";
 const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
 };
 
 export const accessCookieOptions = {
