@@ -329,7 +329,6 @@ const deleteUrl = async (
         );
     }
     const del = await cacheService.del( `url:${url.shortCode}`);
-    console.log(del);
     await urlRepository.deleteById(id);
 
 };

@@ -30,16 +30,6 @@ const login = async (req, res, next) => {
 
     try {
 
-        // const data = await authService.login(req.body);
-
-        // res.status(200).json(
-        //     new ApiResponse(
-        //         200,
-        //         "Login successful",
-        //         data
-        //     )
-        // );
-
         const { user, accessToken, refreshToken } =
             await authService.login({
                 ...req.body,

@@ -19,7 +19,7 @@ const updatePassword = async (userId, hashedPassword) => {
             password: hashedPassword,
         },
         {
-            new: true,
+            returnDocument : "after",
             runValidators: true,
         }
     );
@@ -43,7 +43,7 @@ const verifyUser = async (userId) => {
             isVerified: true,
         },
         {
-            new: true,
+            returnDocument: "after",
         }
     );
 };

@@ -58,7 +58,6 @@ app.get("/health", (req, res) => {
 
 });
 
-
 app.use((req, res, next) => {
     next(new ApiError(HTTP_STATUS.NOT_FOUND, "Route not found"));
 });

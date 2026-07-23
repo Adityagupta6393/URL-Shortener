@@ -419,7 +419,6 @@ const issueEmailVerification = async (user) => {
     }
 
     const token = generateRandomToken();
-    console.log(token);
     const hashedToken = await hashToken(token);
 
     await tokenRepository.deleteAllByUserIdAndType(
@@ -463,7 +462,6 @@ const forgotPassword = async ({ email }) => {
     }
 
     const token = generateRandomToken();
-    console.log(token);
     const hashedToken = await hashToken(token);
 
     await tokenRepository.deleteAllByUserIdAndType(
@@ -483,11 +481,16 @@ const forgotPassword = async ({ email }) => {
     const resetPasswordUrl =
         `${process.env.CLIENT_URL}/reset-password?token=${token}&userId=${user._id}`;
 
-    await emailService.sendResetPasswordEmail({
-        name: user.name,
-        email: user.email,
-        resetPasswordUrl,
-    });
+    try {
+        await emailService.sendResetPasswordEmail({
+            name: user.name,
+            email: user.email,
+            resetPasswordUrl,
+        });
+    }catch(error){
+        console.log("send verification error : " , error);
+    }
+    
 };
 
 

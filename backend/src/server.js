@@ -4,6 +4,7 @@ import "./config/env.js";
 import "./config/redis.js";
 import app from "./app.js";
 import connectDB from "./config/db.js";
+import mongoose from "mongoose";
 
 const PORT = process.env.PORT || 5000;
 
