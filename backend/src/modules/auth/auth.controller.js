@@ -285,10 +285,10 @@ const resendVerification = async (req, res, next) => {
 
     try {
 
-        const { email } = req.body;
+        const { userId } = req.body;
 
         await authService.resendVerification({
-            email,
+            userId,
         });
 
         return res.status(200).json(

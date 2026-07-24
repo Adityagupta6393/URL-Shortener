@@ -552,9 +552,9 @@ const resetPassword = async ({
     );
 };
 
-const resendVerification = async ({ email }) => {
+const resendVerification = async ({ userId }) => {
 
-    const user = await userRepository.findUserByEmail(email);
+    const user = await userRepository.findUserById(userId);
 
     if (!user) {
         throw new ApiError(
