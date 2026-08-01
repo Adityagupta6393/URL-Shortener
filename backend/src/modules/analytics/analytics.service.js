@@ -129,9 +129,45 @@ const getRecentActivity = async (
 
 };
 
+const getOverallClickTrends = async (userId) => {
+
+    const result = analyticsRepository.getOverallClickTrends(userId);
+
+    return result;
+
+};
+
+const getCountryStats = async (userId) => {
+
+    return analyticsRepository.getOverallCountryStats(
+        userId
+    );
+
+};
+
+const getBrowserStats = async (userId) => {
+
+    return analyticsRepository.getOverallBrowserStats(
+        userId
+    );
+
+};
+
+const getDeviceStats = async (userId) => {
+
+    return analyticsRepository.getOverallDeviceStats(
+        userId
+    );
+
+};
+
 export default {
     getDashboardStats,
     getTopUrls,
     getClickTrends,
     getRecentActivity,
+    getOverallClickTrends,
+    getCountryStats,
+    getBrowserStats,
+    getDeviceStats
 }

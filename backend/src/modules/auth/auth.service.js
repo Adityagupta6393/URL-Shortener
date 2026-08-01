@@ -44,7 +44,7 @@ const register = async ({ name, email, password }) => {
 
     await issueEmailVerification(user);
 
-    return;
+    return user;
 };
 
 const login = async ({ email, password, ipAddress, userAgent }) => {
@@ -572,6 +572,8 @@ const resendVerification = async ({ userId }) => {
 
     await issueEmailVerification(user);
 };
+
+
 
 export default {
     register,

@@ -12,6 +12,7 @@ import { UAParser } from "ua-parser-js";
 import analyticsRepository from "../analytics/analytics.repository.js";
 import mongoose from "mongoose";
 import cacheService from "../../services/cache.service.js";
+import HTTP_STATUS from "../../constants/httpStatus.js";
 
 
 const BASE_URL = process.env.BASE_URL;
@@ -485,6 +486,67 @@ const getUrlAnalytics = async ({
 
 };
 
+const getUrlMetadata = async (shortCode) => {
+
+    const url = await urlRepository.findByShortCode(shortCode);
+
+    if (!url) {
+
+        throw new ApiError(
+            HTTP_STATUS.NOT_FOUND,
+            "Short URL not found"
+        );
+
+    }
+
+    if (!url.isActive) {
+
+        return {
+
+            status: "inactive",
+
+        };
+
+    }
+
+    if (
+
+        url.expiresAt &&
+
+        new Date() > url.expiresAt
+
+    ) {
+
+        return {
+
+            status: "expired",
+
+        };
+
+    }
+
+    if (url.isPasswordProtected) {
+
+        return {
+
+            status: "password",
+
+            shortCode,
+
+        };
+
+    }
+
+    return {
+
+        status: "redirect",
+
+        redirectUrl: url.originalUrl,
+
+    };
+
+};
+
 
 export default {
     createShortUrl,
@@ -495,4 +557,5 @@ export default {
     verifyUrlPassword,
     getQrCode,
     getUrlAnalytics,
+    getUrlMetadata
 };

@@ -331,6 +331,214 @@ const getRecentActivity = (
 
 };
 
+const getOverallClickTrends = async (userId) => {
+    const result = Analytics.aggregate([
+
+        {
+            $lookup: {
+                from: "urls",
+                localField: "urlId",
+                foreignField: "_id",
+                as: "url",
+            },
+        },
+
+        {
+            $unwind: "$url",
+        },
+
+        {
+            $match: {
+                "url.userId": new mongoose.Types.ObjectId(userId),
+            },
+        },
+
+        {
+            $group: {
+                _id: {
+                    $dateToString: {
+                        format: "%Y-%m-%d",
+                        date: "$clickedAt",
+                    },
+                },
+                clicks: {
+                    $sum: 1,
+                },
+            },
+        },
+
+        {
+            $sort: {
+                _id: 1,
+            },
+        },
+
+        {
+            $project: {
+                _id: 0,
+                date: "$_id",
+                clicks: 1,
+            },
+        },
+
+    ]);
+    return result;
+};
+
+const getOverallCountryStats = async (userId) => {
+
+    return Analytics.aggregate([
+
+        {
+            $lookup: {
+                from: "urls",
+                localField: "urlId",
+                foreignField: "_id",
+                as: "url",
+            },
+        },
+
+        {
+            $unwind: "$url",
+        },
+
+        {
+            $match: {
+                "url.userId": new mongoose.Types.ObjectId(userId),
+            },
+        },
+
+        {
+            $group: {
+                _id: "$country",
+                clicks: {
+                    $sum: 1,
+                },
+            },
+        },
+
+        {
+            $sort: {
+                clicks: -1,
+            },
+        },
+
+        {
+            $project: {
+                _id: 0,
+                country: "$_id",
+                clicks: 1,
+            },
+        },
+
+    ]);
+
+};
+
+const getOverallBrowserStats = async (userId) => {
+
+    return Analytics.aggregate([
+
+        {
+            $lookup: {
+                from: "urls",
+                localField: "urlId",
+                foreignField: "_id",
+                as: "url",
+            },
+        },
+
+        {
+            $unwind: "$url",
+        },
+
+        {
+            $match: {
+                "url.userId": new mongoose.Types.ObjectId(userId),
+            },
+        },
+
+        {
+            $group: {
+                _id: "$browser",
+                clicks: {
+                    $sum: 1,
+                },
+            },
+        },
+
+        {
+            $sort: {
+                clicks: -1,
+            },
+        },
+
+        {
+            $project: {
+                _id: 0,
+                browser: {
+                    $ifNull: ["$_id", "Unknown"],
+                },
+                clicks: 1,
+            },
+        },
+
+    ]);
+
+};
+
+const getOverallDeviceStats = async (userId) => {
+
+    return Analytics.aggregate([
+
+        {
+            $lookup: {
+                from: "urls",
+                localField: "urlId",
+                foreignField: "_id",
+                as: "url",
+            },
+        },
+
+        {
+            $unwind: "$url",
+        },
+
+        {
+            $match: {
+                "url.userId": new mongoose.Types.ObjectId(userId),
+            },
+        },
+
+        {
+            $group: {
+                _id: "$device",
+                clicks: {
+                    $sum: 1,
+                },
+            },
+        },
+
+        {
+            $sort: {
+                clicks: -1,
+            },
+        },
+
+        {
+            $project: {
+                _id: 0,
+                device: {
+                    $ifNull: ["$_id", "Unknown"],
+                },
+                clicks: 1,
+            },
+        },
+
+    ]);
+
+};
+
 export default {
     create,
     countByUrl,
@@ -343,4 +551,8 @@ export default {
     getTopUrls,
     getClickTrends,
     getRecentActivity,
+    getOverallClickTrends,
+    getOverallCountryStats,
+    getOverallBrowserStats,
+    getOverallDeviceStats
 };

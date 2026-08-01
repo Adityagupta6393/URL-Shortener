@@ -19,10 +19,8 @@ const getDashboardStats = async (
             new ApiResponse(
 
                 200,
-
-                data,
-
-                "Dashboard statistics fetched successfully"
+                "Dashboard statistics fetched successfully",
+                data
 
             )
 
@@ -55,10 +53,8 @@ const getTopUrls = async (
             new ApiResponse(
 
                 200,
-
-                data,
-
-                "Top performing URLs fetched successfully"
+                "Top performing URLs fetched successfully",
+                data
 
             )
 
@@ -94,10 +90,8 @@ const getClickTrends = async (
             new ApiResponse(
 
                 200,
-
-                data,
-
-                "Click trends fetched successfully"
+                "Click trends fetched successfully",
+                data
 
             )
 
@@ -136,10 +130,8 @@ const getRecentActivity = async (
             new ApiResponse(
 
                 200,
-
-                data,
-
-                "Recent activity fetched successfully"
+                "Recent activity fetched successfully",
+                data
 
             )
 
@@ -153,10 +145,75 @@ const getRecentActivity = async (
 
 };
 
+const getOverallClickTrends = async (req, res) => {
+    const data = await analyticsService.getOverallClickTrends(
+        req.user.id
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Overall click trends fetched successfully",
+            data
+        ));
+};
+
+const getCountryStats = async (req, res) => {
+
+    const data = await analyticsService.getCountryStats(
+        req.user.id
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Country statistics fetched successfully",
+            data
+        )
+    );
+
+};
+
+const getBrowserStats = async (req, res) => {
+
+    const data = await analyticsService.getBrowserStats(
+        req.user.id
+    );
+
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            "Browser statistics fetched successfully",
+            data
+        )
+    );
+
+};
+
+const getDeviceStats = async (req, res) => {
+
+    const data = await analyticsService.getDeviceStats(
+        req.user.id
+    );
+
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            "Device statistics fetched successfully",
+            data
+        )
+    );
+
+};
+
 
 export default {
     getDashboardStats,
     getTopUrls,
     getClickTrends,
     getRecentActivity,
+    getOverallClickTrends,
+    getCountryStats,
+    getBrowserStats,
+    getDeviceStats
 }

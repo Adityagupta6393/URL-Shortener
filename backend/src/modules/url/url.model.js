@@ -61,10 +61,6 @@ const urlSchema = new mongoose.Schema(
             type: Boolean,
             default: true,
         },
-        
-        password: {
-            type: String,
-        },
 
         isPasswordProtected: {
             type: Boolean,

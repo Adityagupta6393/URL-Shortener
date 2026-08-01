@@ -28,4 +28,28 @@ router.get(
     analyticsController.getRecentActivity
 );
 
+router.get(
+    "/click-trends",
+    authenticate,
+    analyticsController.getOverallClickTrends
+);
+
+router.get(
+    "/countries",
+    authenticate,
+    analyticsController.getCountryStats
+);
+
+router.get(
+    "/browsers",
+    authenticate,
+    analyticsController.getBrowserStats
+);
+
+router.get(
+    "/devices",
+    authenticate,
+    analyticsController.getDeviceStats
+);
+
 export default router;

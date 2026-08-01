@@ -16,7 +16,8 @@ const register = async (req, res, next) => {
         return res.status(201).json(
             new ApiResponse(
                 201,
-                "User registered successfully"
+                "User registered successfully",
+                data
             )
         );
 
@@ -304,6 +305,7 @@ const resendVerification = async (req, res, next) => {
 
 };
 
+
 export default {
     register,
     login,
@@ -316,5 +318,5 @@ export default {
     verifyEmail,
     forgotPassword,
     resetPassword,
-    resendVerification
+    resendVerification,
 };

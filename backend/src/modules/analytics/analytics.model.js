@@ -53,6 +53,15 @@ const analyticsSchema = new mongoose.Schema({
     timestamps: true,
 });
 
+analyticsSchema.index({
+    clickedAt: -1,
+});
+
+analyticsSchema.index({
+    urlId: 1,
+    clickedAt: -1,
+});
+
 export default mongoose.model(
     "Analytics",
     analyticsSchema

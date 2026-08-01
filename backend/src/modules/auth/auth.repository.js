@@ -48,6 +48,7 @@ const verifyUser = async (userId) => {
     );
 };
 
+
 export default {
     findUserByEmail,
     createUser,

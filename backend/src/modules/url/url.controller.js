@@ -23,8 +23,8 @@ const createShortUrl = async (req, res, next) => {
 
             new ApiResponse(
                 201,
-                url,
-                "Short URL created successfully"
+                "Short URL created successfully",
+                url
             )
 
         );
@@ -75,8 +75,8 @@ const getMyUrls = async (req, res, next) => {
         return res.status(200).json(
             new ApiResponse(
                 200,
-                urls,
-                "URLs fetched successfully"
+                "URLs fetched successfully",
+                urls
             )
         );
 
@@ -103,8 +103,8 @@ const getUrlById = async (
         return res.status(200).json(
             new ApiResponse(
                 200,
-                url,
-                "URL fetched successfully"
+                "URL fetched successfully",
+                url
             )
         );
 
@@ -130,8 +130,8 @@ const deleteUrl = async (
         return res.status(200).json(
             new ApiResponse(
                 200,
-                null,
-                "URL deleted successfully"
+                "URL deleted successfully",
+                null
             )
         );
 
@@ -158,8 +158,8 @@ const verifyUrlPassword = async (
         return res.status(200).json(
             new ApiResponse(
                 200,
-                data,
-                "Password verified"
+                "Password verified",
+                data
             )
         );
 
@@ -191,8 +191,8 @@ const getQrCode = async (
 
             new ApiResponse(
                 200,
-                data,
-                "QR Code fetched successfully"
+                "QR Code fetched successfully",
+                data
             )
 
         );
@@ -228,12 +228,35 @@ const getUrlAnalytics = async (
 
                 200,
 
-                data,
-
-                "Analytics fetched successfully"
+                "Analytics fetched successfully",
+                data
 
             )
 
+        );
+
+    } catch (error) {
+
+        next(error);
+
+    }
+
+};
+
+const getUrlMetadata = async (req, res, next) => {
+
+    try {
+
+        const { shortCode } = req.params;
+
+        const result = await urlService.getUrlMetadata(shortCode);
+
+        res.status(200).json(
+            new ApiResponse(
+                200,
+                "Url Meta data fetched successfully",
+                result
+            )
         );
 
     } catch (error) {
@@ -254,4 +277,5 @@ export default {
     verifyUrlPassword,
     getQrCode,
     getUrlAnalytics,
+    getUrlMetadata
 };

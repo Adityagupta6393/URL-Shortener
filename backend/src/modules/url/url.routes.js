@@ -55,5 +55,10 @@ router.get(
     urlController.getUrlAnalytics
 );
 
+router.get(
+    "/code/:shortCode",
+    urlController.getUrlMetadata
+);
+
 
 export default router;
