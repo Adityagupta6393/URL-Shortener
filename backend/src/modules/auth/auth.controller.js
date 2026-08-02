@@ -6,6 +6,7 @@ import {
     refreshCookieOptions,
     clearAuthCookies
 } from "../../config/cookies.js";
+import ApiError from "../../utils/ApiError.js";
 
 const register = async (req, res, next) => {
 
@@ -100,6 +101,7 @@ const refresh = async (req, res, next) => {
             );
 
     } catch (error) {
+        console.log(error);
         next(error);
     }
 };
