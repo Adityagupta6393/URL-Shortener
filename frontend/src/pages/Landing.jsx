@@ -3,7 +3,7 @@ import Hero from "../components/landing/Hero";
 import Features from "../components/landing/Features";
 import AnalyticsShowcase from "../components/landing/AnalyticsShowcase";
 import HowItWorks from "../components/landing/HowItWorks";
-import QRShowcase from "../components/landing/QRShowcase";
+import QRShowcase from "../components/landing/QrShowcase";
 import Stats from "../components/landing/Stats";
 import Testimonials from "../components/landing/Testimonials";
 import CTA from "../components/landing/CTA";
