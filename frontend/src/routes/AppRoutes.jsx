@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
-import VerifyEmail from "../pages/Auth/VerifyEmail";
+import VerifyEmail from "../pages/auth/VerifyEmail";
 import CheckEmail from "../pages/auth/CheckEmail";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
