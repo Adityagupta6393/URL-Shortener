@@ -205,19 +205,6 @@ const redirectToOriginalUrl = async ({
     );
 
     // ==========================
-    // Password Check
-    // ==========================
-
-    if (url.isPasswordProtected) {
-
-        throw new ApiError(
-            403,
-            "Password required"
-        );
-
-    }
-
-    // ==========================
     // Device Info
     // ==========================
 
@@ -271,6 +258,19 @@ const redirectToOriginalUrl = async ({
         referer,
 
     });
+
+    // ==========================
+    // Password Check
+    // ==========================
+
+    if (url.isPasswordProtected) {
+
+        throw new ApiError(
+            403,
+            "Password required"
+        );
+
+    }
 
     // ==========================
     // Redirect

@@ -56,7 +56,13 @@ const redirectToOriginalUrl = async (
 
             });
 
-        return res.redirect(originalUrl);
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Redirect URL fetched successfully",
+                originalUrl
+            )
+        );
 
     } catch (error) {
         next(error);
